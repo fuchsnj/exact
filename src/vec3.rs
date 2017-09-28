@@ -1,5 +1,7 @@
 use std::ops::{Mul, Sub, Neg, Div, Add};
 use exact::Sqrt;
+use num::One;
+use vec4::Vec4;
 
 
 #[derive(Clone, Debug)]
@@ -32,8 +34,8 @@ impl<T: Clone> Vec3<T> {
 impl<T: Clone + Mul<Output=T> + Sub<Output=T>> Vec3<T> {
 	pub fn cross(self, other: Vec3<T>) -> Vec3<T> {
 		Vec3::new((self.get_y() * other.get_z()) - (self.get_z() * other.get_y()),
-		          (self.get_z() * other.get_x()) - (self.get_x() * other.get_z()),
-		          (self.get_x() * other.get_y()) - (self.get_y() * other.get_x()))
+		             (self.get_z() * other.get_x()) - (self.get_x() * other.get_z()),
+		             (self.get_x() * other.get_y()) - (self.get_y() * other.get_x()))
 	}
 }
 
@@ -64,6 +66,8 @@ impl<T: Clone + Mul<Output=T>> Vec3<T> {
 		)
 	}
 }
+
+/******************** TRAITS *********************/
 
 impl<T: Add<Output=T> + Clone> Add for Vec3<T> {
 	type Output = Vec3<T>;

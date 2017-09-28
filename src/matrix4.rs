@@ -1,9 +1,10 @@
 use std::ops::{Mul, Sub, Neg, Div, Add};
 use num::{One, Zero};
-use vec3::Vec3;
+use point3d::Point3d;
 use vec4::Vec4;
+use vec3::Vec3;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Matrix4<T> {
 	x: Vec4<T>,
 	y: Vec4<T>,
@@ -25,6 +26,12 @@ impl<T> Matrix4<T> {
 	}
 }
 
+impl<T: Clone + Div<Output=T> + Mul<Output=T> + Add<Output=T> + One> Matrix4<T> {
+	pub fn transform_point(&self, point: Point3d<T>) -> Point3d<T> {
+		Point3d::from_homogeneous(self.clone() * point.to_homogeneous())
+	}
+}
+
 impl<T: One + Zero + Clone> Matrix4<T> {
 	pub fn from_translation(v: Vec3<T>) -> Matrix4<T> {
 		Matrix4::new(T::one(), T::zero(), T::zero(), T::zero(),
@@ -34,13 +41,13 @@ impl<T: One + Zero + Clone> Matrix4<T> {
 	}
 
 	pub fn from_scale(x: T) -> Matrix4<T> {
-		Matrix4::from_vec_scale(Vec3::new(x.clone(), x.clone(), x))
+		Matrix4::from_scale3(x.clone(), x.clone(), x)
 	}
 
-	pub fn from_vec_scale(v: Vec3<T>) -> Matrix4<T> {
-		Matrix4::new(v.get_x(), T::zero(), T::zero(), T::zero(),
-		             T::zero(), v.get_y(), T::zero(), T::zero(),
-		             T::zero(), T::zero(), v.get_z(), T::zero(),
+	pub fn from_scale3(x: T, y: T, z: T) -> Matrix4<T> {
+		Matrix4::new(x, T::zero(), T::zero(), T::zero(),
+		             T::zero(), y, T::zero(), T::zero(),
+		             T::zero(), T::zero(), z, T::zero(),
 		             T::zero(), T::zero(), T::zero(), T::one())
 	}
 }
@@ -55,5 +62,13 @@ impl<T: Clone + Mul<Output=T> + Add<Output=T>> Mul for Matrix4<T> {
 			self.x.dot(&b.z), self.y.dot(&b.z), self.z.dot(&b.z), self.w.dot(&b.z),
 			self.x.dot(&b.w), self.y.dot(&b.w), self.z.dot(&b.w), self.w.dot(&b.w)
 		)
+	}
+}
+
+impl<T: Clone + Mul<Output=T> + Add<Output=T>> Mul<Vec4<T>> for Matrix4<T> {
+	type Output = Vec4<T>;
+
+	fn mul(self, v: Vec4<T>) -> Vec4<T> {
+		self.x * v.get_x() + self.y * v.get_y() + self.z * v.get_z() + self.w * v.get_w()
 	}
 }

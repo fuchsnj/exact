@@ -5,3 +5,4 @@ authors = ["Nathan Fuchs <fuchsnj@gmail.com>"]
 
 [dependencies]
 num = "0.1.40"
+pom = "1.0.1"
