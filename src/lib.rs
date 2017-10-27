@@ -4,6 +4,9 @@ extern crate pom;
 #[cfg(test)]
 mod test;
 
+pub mod integer;
+pub mod fraction;
+
 pub mod point3d;
 pub mod vec4;
 pub mod exact;
