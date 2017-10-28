@@ -1,8 +1,5 @@
-use std::ops::{Mul, Sub, Neg, Div, Add};
+use std::ops::{Mul, Sub, Div, Add};
 use exact::Sqrt;
-use num::One;
-use vec4::Vec4;
-
 
 #[derive(Clone, Debug)]
 pub struct Vec3<T> {

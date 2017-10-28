@@ -2,8 +2,7 @@ use num::{BigUint, Zero, One};
 use exact::NeedsParens;
 use std::fmt;
 use signed::{Signed, Sign};
-use std::i64;
-use std::ops::{Add, Neg, Mul, Div, Sub};
+use std::ops::{Add, Mul, Div, Sub};
 use std::cmp::Ordering;
 
 

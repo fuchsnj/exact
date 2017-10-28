@@ -1,5 +1,4 @@
-use std::ops::{Mul, Sub, Neg, Div, Add};
-use exact::Sqrt;
+use std::ops::{Mul, Sub, Div, Add};
 use num::One;
 use vec4::Vec4;
 use vec3::Vec3;

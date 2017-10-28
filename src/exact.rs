@@ -1,14 +1,12 @@
 use std::ops::{Mul, Sub, Neg, Div, Add};
-use std::cmp::{PartialEq, Ord, Ordering};
-use num::{BigUint, ToPrimitive, Zero, One, BigInt};
-use std::{f64, u64};
+use num::{Zero, One};
+use std::f64;
 use std::fmt;
 use pom::parser;
 use pom;
 use pom::Parser;
 use std::str::FromStr;
 use std::iter::FromIterator;
-use std::ops::Deref;
 use fraction::Fraction;
 use signed::{Sign, Signed};
 use natural::Natural;
@@ -63,113 +61,10 @@ impl Exact {
 	pub fn to_f64(&self) -> f64 {
 		unimplemented!()
 	}
-	//	pub fn reciprocal(&self) -> Exact {
-	//		Exact::fraction(&Exact::from_u64(1), &self.clone())
-	//	}
 
 	pub fn from_string(str: &str) -> Exact {
 		StringParser::parse(str)
 	}
-
-	//	fn simplify(&self) -> Exact {
-	//		match *self {
-	//			Exact::Integer(ref x) => { self.clone() }
-	//			//			Exact::Negate(ref x) => {
-	//			//				match *x.as_ref() {
-	//			//					Exact::Negate(ref y) => { y.as_ref().clone() }
-	//			//					Exact::Natural(_)
-	//			//					| Exact::Fraction(_, _)
-	//			//					| Exact::Pow(_, _)
-	//			//					| Exact::Add(_)
-	//			//					| Exact::Mul(_) => {
-	//			//						self.clone()
-	//			//					}
-	//			//				}
-	//			//			}
-	//			//			Exact::Fraction(ref x, ref y) => {
-	//			//				let mut neg_count = 0;
-	//			//				let x = if let Exact::Negate(ref inner) = *x.as_ref() {
-	//			//					neg_count += 1;
-	//			//					inner
-	//			//				} else {
-	//			//					x
-	//			//				};
-	//			//				let y = if let Exact::Negate(ref inner) = *y.as_ref() {
-	//			//					neg_count += 1;
-	//			//					inner
-	//			//				} else {
-	//			//					y
-	//			//				};
-	//			//				let mut frac = Exact::Fraction(x.clone(), y.clone());
-	//			//				if neg_count == 1 {
-	//			//					frac = Exact::Negate(Box::new(frac));
-	//			//				};
-	//			//				frac
-	//			//			}
-	//			//			Exact::Mul(ref list) => {
-	//			//				let list = list.clone();
-	//			//				{
-	//			//					let mut natural = BigUint::one();
-	//			//					let mut natural_positive = true;
-	//			//					let mut unknown_list = vec!();
-	//			//					for x in list {
-	//			//						match x {
-	//			//							Exact::Natural(y) => {
-	//			//								natural *= y;
-	//			//							}
-	//			//							Exact::Negate(box_y) => {
-	//			//								mat
-	//			//							}
-	//			//							_ => unknown_list.push(x);
-	//			//						}
-	//			//					}
-	//			//				}
-	//			//
-	//			//				let mut positive = true;
-	//			//				let list = list.iter().map(|x| {
-	//			//					if let Exact::Negate(ref boxed) = *x {
-	//			//						positive = !positive;
-	//			//						boxed.as_ref().clone()
-	//			//					} else {
-	//			//						x.clone()
-	//			//					}
-	//			//				}).collect();
-	//			//
-	//			//				let output = Exact::Mul(list);
-	//			//
-	//			//				if positive {
-	//			//					output
-	//			//				} else {
-	//			//					Exact::Negate(Box::new(output))
-	//			//				}
-	//			//			}
-	//			//			Exact::Add(ref list) => {
-	//			//				let mut all_negative = true;
-	//			//				let pos_list = list.iter().map(|x| {
-	//			//					if let Exact::Negate(ref boxed) = *x {
-	//			//						boxed.as_ref().clone()
-	//			//					} else {
-	//			//						all_negative = false;
-	//			//						x.clone()
-	//			//					}
-	//			//				}).collect();
-	//			//				let output = Exact::Add(if all_negative {
-	//			//					pos_list
-	//			//				} else {
-	//			//					list.clone()
-	//			//				});
-	//			//
-	//			//				if all_negative {
-	//			//					Exact::Negate(Box::new(output))
-	//			//				} else {
-	//			//					output
-	//			//				}
-	//			//			}
-	//			//			Exact::Pow(ref x, ref y) => {
-	//			//				self.clone() //TODO: implement
-	//			//			}
-	//		}
-	//	}
 }
 
 impl Sqrt for Exact {
@@ -177,7 +72,6 @@ impl Sqrt for Exact {
 
 	fn sqrt(self) -> Exact {
 		unimplemented!()
-		//		Exact::Pow(Box::new(self), Box::new(Exact::from_u64(1) / Exact::from_u64(2))).simplify()
 	}
 }
 
@@ -245,18 +139,6 @@ impl Add for Exact {
 				Exact::Integer(a + b)
 			}
 			_ => unimplemented!()
-			//			(Exact::Integer(top), b @ Exact::Fraction(_, _)) | (b @ Exact::Fraction(_, _), Exact::Integer(top)) => {
-			//				let top = Signed::positive(Exact::Integer(top));
-			//				let bot = Exact::Integer(Signed::positive(BigUint::one()));
-			//				Exact::Fraction(Box::new(top), Box::new(bot)) + b
-			//			}
-			//			(Exact::Fraction(a, b), Exact::Fraction(x, y)) => {
-			//				match (*a.as_ref(), *b.as_ref(), *x.as_ref(), *y.as_ref()) {
-			//					(Exact::Fraction(_, _), _, _, _) | (_, Exact::Fraction(_, _), _, _)
-			//					| (_, _, Exact::Fraction(_, _), _) | (_, _, _, Exact::Fraction(_, _)) => unreachable!(),
-			//					(Exact::Integer(a), Exact::Integer(b), Exact::Integer(x), Exact::Integer(y)) => unimplemented!()
-			//				}
-			//			}
 		}
 	}
 }
@@ -282,16 +164,6 @@ impl Zero for Exact {
 
 	fn is_zero(&self) -> bool {
 		unimplemented!()
-	}
-}
-
-impl PartialEq for Exact {
-	fn eq(&self, other: &Exact) -> bool {
-		unimplemented!()
-		//		match (self, other) {
-		//			(&Exact::Natural(ref x), &Exact::Natural(ref y)) => { x == y }
-		//			(_, _) => unimplemented!()
-		//		}
 	}
 }
 

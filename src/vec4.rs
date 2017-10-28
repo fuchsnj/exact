@@ -1,5 +1,4 @@
-use std::ops::{Mul, Sub, Neg, Div, Add};
-use exact::Sqrt;
+use std::ops::{Mul, Add};
 use point3d::Point3d;
 
 

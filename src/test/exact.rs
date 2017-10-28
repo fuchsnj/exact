@@ -1,7 +1,7 @@
-use exact::{Exact, Sqrt};
+use exact::Exact;
 
 #[test]
-pub fn testCases() {
+pub fn test_cases() {
 	let tests = vec![
 		("0", "0"),
 		("-1", "-1"),

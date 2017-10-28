@@ -1,6 +1,6 @@
 use exact::{Exact, NeedsParens};
 use std::fmt::{self, Display};
-use std::ops::{Neg, Div, Mul, Add};
+use std::ops::{Div, Mul, Add};
 use natural::Natural;
 use signed::Signed;
 use num::Zero;
@@ -44,7 +44,7 @@ impl Zero for Fraction {
 impl Add for Fraction {
 	type Output = Self;
 
-	fn add(self, other: Fraction) -> Self::Output {
+	fn add(self, _other: Fraction) -> Self::Output {
 		unimplemented!()//TODO: implement
 	}
 }

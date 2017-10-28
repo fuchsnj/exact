@@ -1,4 +1,4 @@
-use std::ops::{Mul, Sub, Neg, Div, Add};
+use std::ops::{Mul, Div, Add};
 use num::{One, Zero};
 use point3d::Point3d;
 use vec4::Vec4;
