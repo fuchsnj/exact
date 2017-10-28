@@ -133,3 +133,12 @@ impl<T, O> Add for Signed<T>
 		}
 	}
 }
+
+impl<T: From<u64>> From<i64> for Signed<T> {
+	fn from(x: i64) -> Self {
+		Signed {
+			sign: if x < 0 { Sign::Negative } else { Sign::Positive },
+			value: T::from(x.abs() as u64),
+		}
+	}
+}

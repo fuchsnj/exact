@@ -115,13 +115,3 @@ impl Sub for Natural {
 		}
 	}
 }
-
-
-impl From<i64> for Signed<Natural> {
-	fn from(x: i64) -> Self {
-		Signed {
-			sign: if x < 0 { Sign::Negative } else { Sign::Positive },
-			value: Natural::from(x.abs() as u64),
-		}
-	}
-}
