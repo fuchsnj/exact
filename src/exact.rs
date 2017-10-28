@@ -9,8 +9,9 @@ use pom::Parser;
 use std::str::FromStr;
 use std::iter::FromIterator;
 use std::ops::Deref;
-use integer::Integer;
 use fraction::Fraction;
+use signed::{Sign, Signed};
+use natural::Natural;
 
 pub trait NeedsParens: fmt::Display {
 	fn needs_parens(&self) -> bool;
@@ -36,8 +37,8 @@ pub trait Sqrt {
 
 #[derive(Clone)]
 pub enum Exact {
-	Integer(Integer),
-	Fraction(Fraction),
+	Integer(Signed<Natural>),
+	Fraction(Signed<Fraction>),
 	//	Pow(Box<Exact>, Box<Exact>),
 	//	Add(Vec<Exact>),
 	//	Mul(Vec<Exact>)
@@ -54,7 +55,7 @@ impl fmt::Display for Exact {
 
 impl From<i64> for Exact {
 	fn from(x: i64) -> Self {
-		Exact::Integer(Integer::from(x))
+		Exact::Integer(Signed::<Natural>::from(x))
 	}
 }
 
@@ -291,6 +292,17 @@ impl PartialEq for Exact {
 		//			(&Exact::Natural(ref x), &Exact::Natural(ref y)) => { x == y }
 		//			(_, _) => unimplemented!()
 		//		}
+	}
+}
+
+impl Mul<Sign> for Exact {
+	type Output = Exact;
+
+	fn mul(self, sign: Sign) -> Exact {
+		match sign {
+			Sign::Positive => self,
+			Sign::Negative => -self
+		}
 	}
 }
 

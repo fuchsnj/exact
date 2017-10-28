@@ -4,14 +4,15 @@ extern crate pom;
 #[cfg(test)]
 mod test;
 
-pub mod integer;
-pub mod fraction;
+mod fraction;
 
-pub mod point3d;
-pub mod vec4;
-pub mod exact;
-pub mod matrix4;
-pub mod vec3;
+mod point3d;
+mod vec4;
+mod exact;
+mod matrix4;
+mod vec3;
+mod signed;
+mod natural;
 
 pub use exact::Exact;
 pub use point3d::Point3d;
