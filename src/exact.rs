@@ -4,7 +4,6 @@ use std::str::FromStr;
 use pom::{self, parser, Parser};
 use std::iter::FromIterator;
 use std::fmt;
-use std::cmp::PartialEq;
 use std::cmp::Ordering;
 use std::cmp;
 use bounds::{Bounds, Comparison};
@@ -28,7 +27,7 @@ impl Exact {
 //		}
 //	}
 
-	pub fn bounds(&self, precision: &BigRational) -> Bounds<BigRational> {
+	pub fn bounds(&self, _precision: &BigRational) -> Bounds<BigRational> {
 		match *self {
 			Exact::Rational(ref x) => Bounds::Exact(x.clone())
 		}
@@ -69,7 +68,9 @@ impl Neg for Exact {
 	type Output = Exact;
 
 	fn neg(self) -> Exact {
-		unimplemented!()
+		match self {
+			Exact::Rational(x) => Exact::Rational(-x)
+		}
 	}
 }
 
@@ -77,7 +78,11 @@ impl Add for Exact {
 	type Output = Exact;
 
 	fn add(self, other: Exact) -> Exact {
-		unimplemented!()
+		match (self, other) {
+			(Exact::Rational(a), Exact::Rational(b)) => {
+				Exact::Rational(a + b)
+			}
+		}
 	}
 }
 
@@ -85,7 +90,11 @@ impl Mul for Exact {
 	type Output = Exact;
 
 	fn mul(self, other: Exact) -> Exact {
-		unimplemented!()
+		match (self, other) {
+			(Exact::Rational(a), Exact::Rational(b)) => {
+				Exact::Rational(a * b)
+			}
+		}
 	}
 }
 
@@ -93,7 +102,11 @@ impl Sub for Exact {
 	type Output = Exact;
 
 	fn sub(self, other: Exact) -> Exact {
-		unimplemented!()
+		match (self, other) {
+			(Exact::Rational(a), Exact::Rational(b)) => {
+				Exact::Rational(a - b)
+			}
+		}
 	}
 }
 
@@ -101,7 +114,11 @@ impl Div for Exact {
 	type Output = Exact;
 
 	fn div(self, other: Exact) -> Exact {
-		unimplemented!()
+		match (self, other) {
+			(Exact::Rational(a), Exact::Rational(b)) => {
+				Exact::Rational(a / b)
+			}
+		}
 	}
 }
 
