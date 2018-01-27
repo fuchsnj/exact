@@ -1,77 +1,67 @@
-use std::ops::{Mul, Sub, Neg, Div, Add};
-use num::{Zero, One};
-use std::f64;
-use std::fmt;
-use pom::parser;
-use pom;
-use pom::Parser;
+use num::{BigRational, BigInt};
+use std::ops::{Mul, Div, Neg, Add, Sub};
 use std::str::FromStr;
+use pom::{self, parser, Parser};
 use std::iter::FromIterator;
-use fraction::Fraction;
-use signed::{Sign, Signed};
-use natural::Natural;
+use std::fmt;
+use std::cmp::PartialEq;
+use std::cmp::Ordering;
+use std::cmp;
+use bounds::{Bounds, Comparison};
 
-pub trait NeedsParens: fmt::Display {
-	fn needs_parens(&self) -> bool;
-}
-
-impl NeedsParens {
-	pub fn fmt_with_parens(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		if self.needs_parens() {
-			write!(f, "({})", self)
-		} else {
-			write!(f, "{}", self)
-		}
-	}
-}
-
-
-pub trait Sqrt {
-	type Output;
-
-	fn sqrt(self) -> Self::Output;
-}
+//pub struct PrecisionExact {
+//	precision: BigRational,
+//	exact: Exact,
+//}
 
 
 #[derive(Clone)]
 pub enum Exact {
-	Integer(Signed<Natural>),
-	Fraction(Signed<Fraction>),
-	//	Pow(Box<Exact>, Box<Exact>),
-	//	Add(Vec<Exact>),
-	//	Mul(Vec<Exact>)
+	Rational(BigRational)
+}
+
+impl Exact {
+//	pub fn precision(self, precision: BigRational) -> PrecisionExact {
+//		PrecisionExact {
+//			precision,
+//			exact: self,
+//		}
+//	}
+
+	pub fn bounds(&self, precision: &BigRational) -> Bounds<BigRational> {
+		match *self {
+			Exact::Rational(ref x) => Bounds::Exact(x.clone())
+		}
+	}
+
+	pub fn compare_to(&self, other: &Exact, precision: &BigRational) -> cmp::Ordering {
+		let half_precision = precision / BigRational::from_integer(BigInt::from(2));
+
+		let a_bounds = self.bounds(&half_precision);
+		let other_precision = match a_bounds.size() {
+			Some(size) => precision - size,
+			None => half_precision
+		};
+
+		let b_bounds = other.bounds(&other_precision);
+		match a_bounds.compare_to(&b_bounds) {
+			Comparison::Greater => Ordering::Greater,
+			Comparison::Less => Ordering::Less,
+			Comparison::Intersects => Ordering::Equal
+		}
+	}
+
+
+	pub fn equals(&self, other: &Exact, precision: &BigRational) -> bool {
+		self.compare_to(other, precision) == cmp::Ordering::Equal
+	}
 }
 
 impl fmt::Display for Exact {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match *self {
-			Exact::Integer(ref x) => x.fmt(f),
-			Exact::Fraction(ref x) => x.fmt(f)
+			Exact::Rational(ref x) => write!(f, "{}", x)
 		}
-	}
-}
-
-impl From<i64> for Exact {
-	fn from(x: i64) -> Self {
-		Exact::Integer(Signed::<Natural>::from(x))
-	}
-}
-
-impl Exact {
-	pub fn to_f64(&self) -> f64 {
-		unimplemented!()
-	}
-
-	pub fn from_string(str: &str) -> Exact {
-		StringParser::parse(str)
-	}
-}
-
-impl Sqrt for Exact {
-	type Output = Exact;
-
-	fn sqrt(self) -> Exact {
-		unimplemented!()
 	}
 }
 
@@ -79,54 +69,7 @@ impl Neg for Exact {
 	type Output = Exact;
 
 	fn neg(self) -> Exact {
-		match self {
-			Exact::Integer(x) => {
-				Exact::Integer(-x)
-			}
-			Exact::Fraction(frac) => {
-				Exact::Fraction(-frac)
-			}
-		}
-	}
-}
-
-
-impl Div for Exact {
-	type Output = Exact;
-
-	fn div(self, other: Exact) -> Exact {
-		match (self, other) {
-			(Exact::Integer(a), b) => {
-				Exact::Fraction(a.into()) / b
-			}
-			(a, Exact::Integer(b)) => {
-				a / Exact::Fraction(b.into())
-			}
-			(Exact::Fraction(a), Exact::Fraction(b)) => {
-				a / b
-			}
-		}
-	}
-}
-
-impl Mul for Exact {
-	type Output = Exact;
-
-	fn mul(self, other: Exact) -> Exact {
-		match (self, other) {
-			(Exact::Integer(a), Exact::Integer(b)) => {
-				Exact::Integer(a * b)
-			}
-			(Exact::Integer(a), b) => {
-				Exact::Fraction(a.into()) * b
-			}
-			(a, Exact::Integer(b)) => {
-				a * Exact::Fraction(b.into())
-			}
-			(Exact::Fraction(a), Exact::Fraction(b)) => {
-				a * b
-			}
-		}
+		unimplemented!()
 	}
 }
 
@@ -134,12 +77,15 @@ impl Add for Exact {
 	type Output = Exact;
 
 	fn add(self, other: Exact) -> Exact {
-		match (self, other) {
-			(Exact::Integer(a), Exact::Integer(b)) => {
-				Exact::Integer(a + b)
-			}
-			_ => unimplemented!()
-		}
+		unimplemented!()
+	}
+}
+
+impl Mul for Exact {
+	type Output = Exact;
+
+	fn mul(self, other: Exact) -> Exact {
+		unimplemented!()
 	}
 }
 
@@ -147,49 +93,43 @@ impl Sub for Exact {
 	type Output = Exact;
 
 	fn sub(self, other: Exact) -> Exact {
-		self + (-other)
-	}
-}
-
-impl One for Exact {
-	fn one() -> Self {
-		Exact::from(1)
-	}
-}
-
-impl Zero for Exact {
-	fn zero() -> Self {
-		Exact::from(0)
-	}
-
-	fn is_zero(&self) -> bool {
 		unimplemented!()
 	}
 }
 
-impl Mul<Sign> for Exact {
+impl Div for Exact {
 	type Output = Exact;
 
-	fn mul(self, sign: Sign) -> Exact {
-		match sign {
-			Sign::Positive => self,
-			Sign::Negative => -self
-		}
+	fn div(self, other: Exact) -> Exact {
+		unimplemented!()
 	}
 }
+
+impl From<i64> for Exact {
+	fn from(value: i64) -> Self {
+		Exact::Rational(BigRational::from_integer(BigInt::from(value)))
+	}
+}
+
+impl<'a> From<&'a str> for Exact {
+	fn from(str: &'a str) -> Self {
+		StringParser::parse(str)
+	}
+}
+
 
 struct StringParser;
 
 impl StringParser {
-	pub fn parse(str: &str) -> Exact {
+	pub fn parse(str: &str) -> Exact {//TODO: return result
 		Self::parser().parse(&mut pom::TextInput::new(str)).unwrap()
 	}
 	fn number() -> Parser<char, Exact> {
-		parser::one_of("01234567894").repeat(1..)//TODO:convert without `i64` to prevent precision loss
-				.collect()
-				.map(String::from_iter)
-				.convert(|str| i64::from_str(&str))
-				.map(Exact::from)
+		parser::one_of("0123456789").repeat(1..)//TODO:convert without `i64` to prevent precision loss
+			.collect()
+			.map(String::from_iter)
+			.convert(|str| i64::from_str(&str))
+			.map(Exact::from)
 	}
 	fn paren() -> Parser<char, Exact> {
 		parser::sym('(') * Self::expression() - parser::sym(')')
@@ -205,30 +145,30 @@ impl StringParser {
 
 	fn add() -> Parser<char, Exact> {
 		(Self::multiply() + (parser::one_of("+-") + parser::call(Self::add)).repeat(0..))
-				.map(|(a, o)| o.iter().fold(a, |b, &(t, ref c)| {
-					if t == '+' {
-						b + c.clone()
-					} else {
-						b - c.clone()
-					}
-				}))
+			.map(|(a, o)| o.iter().fold(a, |b, &(t, ref c)| {
+				if t == '+' {
+					b + c.clone()
+				} else {
+					b - c.clone()
+				}
+			}))
 	}
 
 	fn multiply() -> Parser<char, Exact> {
 		(Self::negate() + (parser::one_of("*/") + parser::call(Self::multiply)).repeat(0..))
-				.map(|(a, o)| o.iter().fold(a, |b, &(t, ref c)| {
-					if t == '*' {
-						b * c.clone()
-					} else {
-						b / c.clone()
-					}
-				}))
+			.map(|(a, o)| o.iter().fold(a, |b, &(t, ref c)| {
+				if t == '*' {
+					b * c.clone()
+				} else {
+					b / c.clone()
+				}
+			}))
 	}
 
 	fn negate() -> Parser<char, Exact> {
 		(
 			parser::sym('-') * Self::atom()
-					.map(|x| Exact::neg(x))
+				.map(|x| Exact::neg(x))
 		) | Self::atom()
 	}
 
