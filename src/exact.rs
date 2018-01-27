@@ -16,7 +16,10 @@ use bounds::{Bounds, Comparison};
 
 #[derive(Clone)]
 pub enum Exact {
-	Rational(BigRational)
+	Rational(BigRational),
+	Pi,
+	Neg(Box<Exact>),
+	Add(Box<Exact>, Box<Exact>),
 }
 
 impl Exact {
@@ -27,9 +30,14 @@ impl Exact {
 //		}
 //	}
 
-	pub fn bounds(&self, _precision: &BigRational) -> Bounds<BigRational> {
+	pub fn bounds(&self, precision: &BigRational) -> Bounds<BigRational> {
 		match *self {
-			Exact::Rational(ref x) => Bounds::Exact(x.clone())
+			Exact::Rational(ref x) => Bounds::Exact(x.clone()),
+			Exact::Pi => {
+				unimplemented!()
+			}
+			Exact::Neg(x) => -x.bounds(precision),
+			Exact::Add(a, b) => a.bounds(precision) + b.bounds(precision)
 		}
 	}
 
@@ -59,7 +67,9 @@ impl Exact {
 impl fmt::Display for Exact {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match *self {
-			Exact::Rational(ref x) => write!(f, "{}", x)
+			Exact::Rational(ref x) => write!(f, "{}", x),
+			Exact::Pi => write!(f, "π"),
+			Exact::Neg(x) => write!(f, "-({})", x)
 		}
 	}
 }
@@ -69,7 +79,8 @@ impl Neg for Exact {
 
 	fn neg(self) -> Exact {
 		match self {
-			Exact::Rational(x) => Exact::Rational(-x)
+			Exact::Rational(x) => Exact::Rational(-x),
+			x => Exact::Neg(Box::new(x))
 		}
 	}
 }
@@ -79,9 +90,8 @@ impl Add for Exact {
 
 	fn add(self, other: Exact) -> Exact {
 		match (self, other) {
-			(Exact::Rational(a), Exact::Rational(b)) => {
-				Exact::Rational(a + b)
-			}
+			(Exact::Rational(a), Exact::Rational(b)) => Exact::Rational(a + b),
+			(a, b) => Exact::Add(Box::new(a), Box::new(b))
 		}
 	}
 }
