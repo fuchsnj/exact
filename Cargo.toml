@@ -2,8 +2,14 @@
 name = "exact"
 version = "0.0.1"
 authors = ["Nathan Fuchs <fuchsnj@gmail.com>"]
+edition = "2018"
 
 [dependencies]
-num = "0.1.40"
-pom = "1.0.1"
-bounds = "0.3"
+num = {version="^0.2"}
+#num-bigint = {version = "0.1", default_features = false}
+##num-rational = {version = "0.1", default_features = false, features=["num-bigint"]}
+##num-traits = {version = "0.1", default_features = false}
+##num-integer = {version = "0.1", default_features = false}
+bounds = {path="/home/nathan/repos/bounds"}
+pest_derive = "2.1.0"
+pest = "2.1.1"

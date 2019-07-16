@@ -1,0 +1,34 @@
+math = _{SOI ~ statement ~ &EOI}
+statement = _{(addition | addition_less) | atom}
+
+add = {addition_less ~ "+" ~ (addition | addition_less)}
+subtract = {addition_less ~ "-" ~ (addition | addition_less)}
+
+addition = _{add | subtract}
+addition_less = _{multiplication | multiplication_less}
+
+multiply = {multiplication_less ~ "*" ~ (multiplication | multiplication_less)}
+divide = {multiplication_less ~ "/" ~ (multiplication | multiplication_less)}
+
+multiplication = _{multiply | divide}
+multiplication_less = _{atom}
+
+atom = _{constant | group | function}
+group = _{"(" ~ statement ~ ")"}
+constant = {number_constant | pi_constant}
+
+pi_constant = @{"pi" | "π"}
+
+// variable = @{('a'..'z') | ('A'..'Z')}
+
+function = {pderiv_f}
+pderiv_f = {"pderiv" ~ "(" ~ statement ~ ")"}
+
+// integer = @{ ("+" | "-")? ~ ('0'..'9')+ }
+number_constant = {whole_part_number_constant ~ decimal_part_number_constant?}
+whole_part_number_constant = @{("+" | "-")? ~ ('0'..'9')+}
+decimal_part_number_constant = @{"." ~ ('0'..'9')+}
+
+horizontal_whitespace = _{ " " | "\t" }
+hw = _{horizontal_whitespace}
+WHITESPACE = _{" " | "\t" | NEWLINE}

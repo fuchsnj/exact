@@ -1,149 +1,112 @@
-//use num::{BigRational, BigUint, Zero, One, BigInt};
-//use std::thread;
-//use bounds::Bounds;
-//use sign::Sign;
-//
-////pub trait InfiniteSeries {
-////	type Step;
-////}
-//
-////impl IntoIterator for InfiniteSeries {
-////	type Item = ();
-////	type IntoIter = ();
-////
-////	fn into_iter(self) -> Self::IntoIter {
-////		unimplemented!()
-////	}
-////}
-//
-//pub struct InfiniteSumIterator<S: InfiniteSum + ? Sized> {
-//	prev_result: Option<InfiniteSumResult<S::Step>>
-//}
-//
-//impl<S: InfiniteSum + ? Sized> Iterator for InfiniteSumIterator<S> {
-//	type Item = Bounds<BigRational>;
-//
-//	fn next(&mut self) -> Option<Bounds<BigRational>> {
-//		match self.prev_result.take() {
-//			Some(result) => {
-//				let result = S::next(result);
-//				self.prev_result = Some(result.clone());
-//				Some(result.result)
-//			}
-//			None => {
-//				let result = S::first();
-//				self.prev_result = Some(result.clone());
-//				Some(result.result)
-//			}
-//		}
-//	}
-//}
-//
-//
-//pub trait InfiniteSum {
-//	type Step: Clone;
-//
-//	fn first() -> InfiniteSumResult<Self::Step>;
-//
-//	fn next(prev_result: InfiniteSumResult<Self::Step>) -> InfiniteSumResult<Self::Step>;
-//
-//	fn inf_sum() -> InfiniteSumIterator<Self> {
-//		InfiniteSumIterator {
-//			prev_result: None
-//		}
-//	}
-//}
-//
+use num::{BigRational, BigInt};
+use bounds::bounds::Bounds;
+use bounds::bound::Bound;
+
+pub fn pi() -> AlternatingInfiniteSum<PiAlternatingSeries> {
+    AlternatingInfiniteSum::<PiAlternatingSeries>::new()
+}
+
 //#[test]
-//fn test() {
-//	//	let mut inf_sum = Pi::inf_sum();
-//	//	for _ in 0..1000{
-//	//		let sum = inf_sum.next().unwrap();
-//	//		println!("sum: {}", sum);
-//	//	}
-//	//	panic!("test panic");
+//pub fn test() {
+////    let mut pi = PiAlternatingSeries::new();
+////    for x in 0..10 {
+////        println!("{}: {}", x, pi.next());
+////    }
+//    let low = &BigRational::from((BigInt::from(1), BigInt::from(10_u64)));
+////    let high = &BigRational::from((BigInt::from(1) / BigInt::from(10000000000_u64)));
+//    let mut pi = pi();
+//    println!("Range: {:?}", pi.get_bounds(low));
+//    panic!();
 //}
-//
-//#[derive(Clone)]
-//pub struct InfiniteSumResult<T: Clone> {
-//	step: T,
-//	bounds: Bounds<BigRational>
-//}
-//
-//#[derive(Clone)]
-//pub struct PiStep {
-//	positive: bool,
-//	denom: BigInt
-//}
-//
-//struct AlternatingInfiniteSumResult<T>{
-//	value: BigRational,
-//	step: T
-//}
-//
-//trait AlternatingInfiniteSum{
-//	type Step;
-//
-//	fn first() -> (AlternatingInfiniteSumResult<Self::Step>, Sign);
-//
-//	fn next(prev: &BigRational)
-//
-//}
-//
-//impl <T: AlternatingInfiniteSum> InfiniteSum for T{
-//	type Step = Self::Step;
-//
-//	fn first() -> InfiniteSumResult<Self::Step> {
-//		unimplemented!()
-//	}
-//
-//	fn next(prev_result: InfiniteSumResult<Self::Step>) -> InfiniteSumResult<Self::Step> {
-//		unimplemented!()
-//	}
-//}
-//
-//
-//pub struct Pi;
-//
-//impl InfiniteSum for Pi {
-//	type Step = PiStep;
-//
-//	fn first() -> InfiniteSumResult<PiStep> {
-//		InfiniteSumResult {
-//			step: PiStep {
-//				positive: true,
-//				denom: BigInt::from(1 as u64),
-//			},
-//			bounds: Bounds::from(..BigRational::from(BigInt::from(4 as u64))),
-//		}
-//	}
-//
-//	fn next(prev_result: InfiniteSumResult<PiStep>) -> InfiniteSumResult<PiStep> {
-//
-//		let start = prev_result.bounds;
-//
-//		let prev_sum = prev_result.result;
-//		let prev_step = prev_result.step;
-//
-//		let two = BigInt::from(2 as u64);
-//		let four = BigInt::from(4 as u64);
-//
-//		let current_step = PiStep {
-//			positive: !prev_step.positive,
-//			denom: prev_step.denom + two,
-//		};
-//
-//		let term = BigRational::from((four, current_step.denom.clone()));
-//		let term = if current_step.positive {
-//			term
-//		} else {
-//			-term
-//		};
-//
-//		InfiniteSumResult {
-//			step: current_step,
-//			bounds: prev_sum + term,
-//		}
-//	}
-//}
-//
+
+pub trait InfiniteSum {
+    fn get_bounds(&mut self, accuracy: &BigRational) -> Bounds<BigRational>;
+}
+
+pub struct AlternatingInfiniteSum<T> {
+    series: T
+}
+
+impl<T: AlternatingInfiniteSeries> AlternatingInfiniteSum<T> {
+    pub fn new() -> AlternatingInfiniteSum<T> {
+        AlternatingInfiniteSum { series: T::new() }
+    }
+}
+
+impl<T: AlternatingInfiniteSeries> InfiniteSum for AlternatingInfiniteSum<T> {
+    fn get_bounds(&mut self, accuracy: &BigRational) -> Bounds<BigRational> {
+        let a = self.series.next();
+        let b = self.series.next() + a.clone();
+        let mut min;
+        let mut max;
+        let mut max_next;
+        if a < b {
+            min = a;
+            max = b.clone();
+            max_next = false;
+        } else {
+            min = b.clone();
+            max = a;
+            max_next = true;
+        };
+
+        let mut sum = b;
+        loop {
+            println!("Min: {} Max: {}", min, max);
+            let diff = max.clone() - min.clone();
+            println!("Diff: {}", diff);
+            if diff <= *accuracy { break; }
+            sum = sum.clone() + self.series.next();
+            if max_next {
+                max = sum.clone();
+            } else {
+                min = sum.clone();
+            }
+            max_next = !max_next;
+        }
+        let offset = T::offset();
+        Bounds::Range(
+            Some(Bound::exclusive(min + offset.clone())),
+            Some(Bound::exclusive(max + offset)),
+        )
+    }
+}
+
+pub trait AlternatingInfiniteSeries {
+    fn new() -> Self;
+    fn offset() -> BigRational;
+    fn next(&mut self) -> BigRational;
+}
+
+pub struct PiAlternatingSeries {
+    step: BigRational,
+    positive: bool,
+}
+
+impl AlternatingInfiniteSeries for PiAlternatingSeries {
+    fn new() -> Self {
+        PiAlternatingSeries {
+            step: BigRational::from_integer(BigInt::from(2)),
+            positive: true,
+        }
+    }
+
+    fn offset() -> BigRational {
+        BigRational::from(BigInt::from(3))
+    }
+
+    fn next(&mut self) -> BigRational {
+        let four = BigRational::from_integer(BigInt::from(4));
+        let step = self.step.clone();
+        let step2 = step.clone() + BigInt::from(1);
+        let step3 = step2.clone() + BigInt::from(1);
+
+        let mut output = four / (step * step2 * step3.clone());
+        if !self.positive {
+            output = -output;
+        }
+        self.step = step3;
+        self.positive = !self.positive;
+        output
+    }
+}

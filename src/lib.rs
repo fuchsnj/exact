@@ -1,10 +1,17 @@
-extern crate num;
-extern crate pom;
-extern crate bounds;
+#[macro_use]
+extern crate pest_derive;
 
 #[cfg(test)]
 mod test;
 
+
+pub mod parser;
 pub mod exact;
-mod sum;
 pub mod sign;
+pub mod vec;
+
+mod sum;
+
+pub use self::exact::Exact;
+pub use self::vec::Vec3;
+
